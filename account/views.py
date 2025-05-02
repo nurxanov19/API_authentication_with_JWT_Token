@@ -1,10 +1,13 @@
 from django.shortcuts import render
 
 from django.contrib.auth.models import User
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer
 from rest_framework.response import Response
 from rest_framework import status, generics
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import permissions
 
 
 # class RegisterView(APIView):
@@ -30,3 +33,10 @@ class RegisterView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED
         )
 
+
+class ProfileView(APIView):
+    authentication_classes = JWTAuthentication,
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+        return Response(data={'user': user.username})
