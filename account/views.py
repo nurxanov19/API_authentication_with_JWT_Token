@@ -74,4 +74,4 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
         user = request.user
-        return Response(data={'user': user.username})
+        return Response(data={'user': user.username}, status=status.HTTP_200_OK)
