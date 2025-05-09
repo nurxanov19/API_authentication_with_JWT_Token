@@ -12,6 +12,7 @@ class AuthTest(APITestCase):
         self.login_url = reverse('login')
         self.logout_url = reverse('logout')
         self.profile_url = reverse('profile')
+        self.password_change_url = reverse('password-change')
 
         self.user_data = {
             'username': 'sohib',
@@ -71,4 +72,18 @@ class AuthTest(APITestCase):
 
         self.assertEqual(response.status_code, 401)
         self.assertNotIn('Message', response.data)
+
+    def test_password_change(self):
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.access_token)
+        data_change = {
+            'password': 'malik0000',
+            'new_password': 'nurxonov'
+        }
+        response = self.client.put(self.password_change_url, {'password': data_change['password'],
+                                                               'new_password': data_change['new_password'] })
+        print("Status:", response.status_code)
+        print("Data:", response.data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['Message'], f'Sohib, Your password changed successfully')
 

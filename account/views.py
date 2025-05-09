@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import permissions
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
@@ -24,7 +24,10 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 
 
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.all()               # queryset is required by DRF's CreateAPIView base class for internal logic, even not being directly used in class
+    # def get_queryset(self):           # instead of queryset, DRF asks for model you are using. So, one of queryset and get_queryset() must be given
+    #     return User.objects.all()
+
     serializer_class = RegisterSerializer
 
     def create(self, request, *args, **kwargs):
@@ -67,11 +70,30 @@ class LogoutView(APIView):
             return Response({'Error': 'Something went wrong '})
 
 
-
-
 class ProfileView(APIView):
     authentication_classes = JWTAuthentication,
     permission_classes = [IsAuthenticated]
     def get(self, request):
         user = request.user
         return Response(data={'user': user.username}, status=status.HTTP_200_OK)
+
+
+class PasswordChangeView(APIView):
+    authentication_classes = JWTAuthentication,
+    permission_classes = IsAuthenticated,
+
+    def put(self, request):
+        password = request.data.get('password')
+        new_password = request.data.get('new_password')
+
+        user = get_user_model().objects.get(pk=request.user.id)
+        if not user.check_password(raw_password=password):
+            return Response({'Error': 'Password did not mach, incorrect'}, status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'Message': f'{user.username.title()}, Your password changed successfully'}, status=status.HTTP_200_OK)
+
+
+

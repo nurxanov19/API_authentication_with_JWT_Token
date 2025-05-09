@@ -4,8 +4,8 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 
 class RegisterSerializer(ModelSerializer):
-    password2 = CharField(style={'input_type': 'password'}, write_only=True)
-    admin_key = CharField(write_only=True, required=False)
+    password2 = CharField(style={'input_type': 'password'}, write_only=True)    # style ->  defines how should data appear in HTML forms, here password will not be plain text, dots instead
+    admin_key = CharField(write_only=True, required=False)                      # write_only -> controls data privacy. data can be written and sent but not received on API response (DRF will create, update, save it)
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'password2', 'admin_key']
